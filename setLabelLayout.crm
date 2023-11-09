@@ -1,0 +1,39 @@
+#setLanguageLevel 3;
+
+Void DisplayAddressFormat()
+{
+  SearchEngine se;
+  se.addCriteria("AddressFormat.addressformat_id", "Gt", "0");  // Alle Adressformate (id > 0)
+  se.addField("AddressFormat.addressformat_id");
+  se.addField("AddressFormat.name");
+  se.addField("AddressFormat.layout_id");
+  se.addField("AddressFormat.atype_idx");
+  se.addField("AddressFormat.labelLayout");
+  se.addOrder("AddressFormat.addressformat_id", true);
+  for (se.select(); !se.eof(); se.next())
+  {
+    printLine("id=" + se.getField(0) + ", name=" + se.getField(1) + ", layout_id=" + se.getField(2) + ", atype_idx=" + se.getField(3) + ", labelLayout=" + se.getField(4));
+  }
+}
+
+Void UpdateAddressFormatPost()
+{
+  SearchEngine se;
+  se.addCriteria("AddressFormat.addressformat_id", "Equals", "27");  // id=27, name=Other, atype_idx=1
+  //WICHTIG: Backslash durch Doppel-Backslash ersetzen!
+  se.addData("AddressFormat.labelLayout", "<name>\\n<atmr>[ ]<atfn>[ ]<atm?>[ ]<atln>[\\n]<atti>\\n|x|<padr>[\\n]<pad2>[\\n]<pad3>\\n<cozi>[ ]<city>[\\n]<cnt?>");
+  se.update();
+}
+
+Void UpdateAddressFormatStreet()
+{
+  SearchEngine se;
+  se.addCriteria("AddressFormat.addressformat_id", "Equals", "75");  // id=75, name=Other, atype_idx=2
+  //WICHTIG: Backslash durch Doppel-Backslash ersetzen!
+  se.addData("AddressFormat.labelLayout", "<name>\\n<atmr>[ ]<atfn>[ ]<atm?>[ ]<atln>[\\n]<atti>\\n|x|<sadr>\\n<zipp>[ ]<scit>[ ][\\n]<cnt?>");
+  se.update();
+}
+
+DisplayAddressFormat();
+//UpdateAddressFormatPost();
+//UpdateAddressFormatStreet();
