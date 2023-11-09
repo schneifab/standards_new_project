@@ -1,0 +1,109 @@
+#setLanguageLevel 4;
+
+/**
+ * Author: Marc Eberhard, SuperOffice AG
+ * Customer: Demo
+ * 
+ * Created date: 2023-02-01
+ * Updated date: 
+ * 
+ * Topic: Set default language and number format
+ * Description:
+ *  - Write UserPreference entries "LanguageUICookie" and "LanguageCookie" for all users (SystemWide) ==> default language and number format
+ *  - To test: delete all cookies, login
+ *  - Observe: SuperOffice appears in the language and number format set in the CRMScript
+ *
+ * Changes: 
+ * 
+**/
+
+Void UpdateFunctionSettings(String key, String value, String id, Bool write)
+{
+  printLine("UpdateFunctionSettings: key=" + key + ", value=" + value + ", id=" + id + ", write=" + write.toString());
+  // Read setting
+  SearchEngine se;
+  if (id.isEmpty())
+  {
+    se.addCriteria("UserPreference.prefsection", "Equals", "Functions");
+    se.addCriteria("UserPreference.prefkey", "Equals", key);
+    se.addCriteria("UserPreference.deflevel", "Equals", "2");
+  }
+  else
+  {
+    se.addCriteria("UserPreference.userpreference_id", "Equals", id);
+  }
+  se.addField("UserPreference.userpreference_id");
+  se.select();
+  DateTime now;
+  if (se.eof())
+  {
+    // Insert
+    SearchEngine seInsert;
+    seInsert.addData("UserPreference.deflevel", "2");
+    seInsert.addData("UserPreference.maxlevel", "5");
+    seInsert.addData("UserPreference.owner_id", "0");
+    seInsert.addData("UserPreference.prefsection", "Functions");
+    seInsert.addData("UserPreference.prefkey", key);
+    seInsert.addData("UserPreference.prefvalue", value);
+    seInsert.addData("UserPreference.registered", now.toString());
+    seInsert.addData("UserPreference.registered_associate_id", "3");  // ejSysUser
+    seInsert.addData("UserPreference.updated", "1760-01-01 00:00:00");
+    seInsert.addData("UserPreference.updated_associate_id", "0");
+    seInsert.addData("UserPreference.updatedCount", "0");
+    if (write) id = seInsert.insert().toString();
+    printLine("inserted, id=" + id);
+  }
+  else
+  {
+    // Update
+    SearchEngine seUpdate;
+    seUpdate.addCriteria("UserPreference.userpreference_id", "Equals", id);
+    seUpdate.addData("UserPreference.deflevel", "2");
+    seUpdate.addData("UserPreference.maxlevel", "5");
+    seUpdate.addData("UserPreference.owner_id", "0");
+    seUpdate.addData("UserPreference.prefvalue", value);
+    seUpdate.addData("UserPreference.updated", now.toString());
+    seUpdate.addData("UserPreference.updated_associate_id", "3");  // ejSysUser
+    if (write) seUpdate.update();
+    printLine("updated");
+  }
+  // Display settings
+  Map users;
+  SearchEngine seUser;
+  seUser.addCriteria("associate.associate_id", "Gt", "0");
+  seUser.addField("associate.associate_id");
+  seUser.addField("associate.name");
+  for (seUser.select(); !seUser.eof(); seUser.next())
+  {
+    users.insert(seUser.getField(0), seUser.getField(1));
+  }
+  SearchEngine seRead;
+  seRead.addCriteria("UserPreference.prefsection", "Equals", "Functions");
+  seRead.addCriteria("UserPreference.prefkey", "Equals", key);
+  seRead.addField("UserPreference.userpreference_id");
+  seRead.addField("UserPreference.prefsection");
+  seRead.addField("UserPreference.prefkey");
+  seRead.addField("UserPreference.deflevel");
+  seRead.addField("UserPreference.owner_id");
+  seRead.addField("UserPreference.prefvalue");
+  seRead.addOrder("UserPreference.userpreference_id", true);
+  for (seRead.select(); !seRead.eof(); seRead.next())
+  {
+    String ownerId = seRead.getField(4);
+    String user = "";
+    if (users.exists(ownerId)) user = users.get(ownerId);
+    printLine("id=" + seRead.getField(0) + ", prefsection=" + seRead.getField(1) + ", prefkey=" + seRead.getField(2) + ", deflevel=" + seRead.getField(3) + ", owner_id=" + ownerId + ", user=" + user + ", prefvalue=" + seRead.getField(5));
+  }
+}
+Void TestUpdateLanguage()
+{
+  String key = "LanguageUICookie";  // active language
+  String value = "de-DE";
+  String id = "";  // Only if you know the id of the setting of your user
+  Bool write = false;
+  UpdateFunctionSettings(key, value, id, write);
+  key = "LanguageCookie";  // Number and date format
+  id = "";  // Only if you know the id of the setting of your user
+  UpdateFunctionSettings(key, value, id, write);
+}
+TestUpdateLanguage();
