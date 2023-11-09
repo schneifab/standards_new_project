@@ -1,0 +1,18 @@
+#setLanguageLevel 4;
+
+/*
+SearchEngine se;
+se.addCriteria("country.country_id", "Gt", "0");
+se.addData("country.addressLayout", "7");
+se.addData("country.addressLayoutDomestic", "7");
+se.addData("country.addressLayoutForeign", "7");
+se.update();
+*/
+
+SearchEngine se;
+se.addField("country.country_id");
+se.addField("country.addressLayout");
+se.addField("country.addressLayoutDomestic");
+se.addField("country.addressLayoutForeign");
+se.addCriteria("country.country_id", "OperatorGt", "0");
+se.executeHTMLTable();
